@@ -21,3 +21,9 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+logging:
+  level:
+    com.spvb.tradingengine: ${TRADING_LOG_LEVEL:INFO}
+  pattern:
+    level: "%5p [requestId=%X{requestId:--}]"

@@ -22,9 +22,11 @@ import com.spvb.tradingengine.repository.TradeRepository;
 import com.spvb.tradingengine.entity.OrderEntity;
 import com.spvb.tradingengine.entity.TradeEntity;
 import com.spvb.tradingengine.repository.mapper.PersistenceMapper;
+import com.spvb.tradingengine.util.TransactionLogging;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +35,7 @@ import static com.spvb.tradingengine.enums.OrderStatus.*;
 import static com.spvb.tradingengine.enums.OrderStatus.OPEN;
 import static com.spvb.tradingengine.enums.Side.*;
 import static com.spvb.tradingengine.repository.mapper.PersistenceMapper.toOrder;
+import static com.spvb.tradingengine.util.TransactionLogging.logAfterCommit;
 import static java.lang.Integer.MAX_VALUE;
 import static java.time.ZoneOffset.*;
 import static lombok.AccessLevel.PRIVATE;
@@ -40,6 +43,7 @@ import static lombok.AccessLevel.PRIVATE;
 @Service
 @RequiredArgsConstructor
 @Transactional
+@Slf4j
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class TradingService {
     CatalogService catalogService;
@@ -82,7 +86,9 @@ public class TradingService {
                 .updatedAt(now)
                 .build();
 
-        return executeMatchPlan(instrument, toOrder(orderRepository.save(entity)), plan);
+        val result = executeMatchPlan(instrument, toOrder(orderRepository.save(entity)), plan);
+        logOrderAfterCommit("выставление", result);
+        return result;
     }
 
     public Order amendOrder(
@@ -153,7 +159,9 @@ public class TradingService {
         entity.setPriority(priority);
         entity.setUpdatedAt(OffsetDateTime.now(UTC));
 
-        return executeMatchPlan(instrument, toOrder(entity), plan);
+        val result = executeMatchPlan(instrument, toOrder(entity), plan);
+        logOrderAfterCommit("изменение", result);
+        return result;
     }
 
     public Order cancelOrder(final long userId, final long orderId) {
@@ -169,7 +177,10 @@ public class TradingService {
                 userId,
                 new MatchPlan(List.of(), false)
         );
-        return cancelAndReleaseReserve(instrument, order);
+
+        val result = cancelAndReleaseReserve(instrument, order);
+        logOrderAfterCommit("отмена", result);
+        return result;
     }
 
     private MatchPlan buildMatchPlan(
@@ -206,14 +217,21 @@ public class TradingService {
             val buy = incoming.side() == BUY ? incoming : resting;
             val sell = incoming.side() == SELL ? incoming : resting;
 
-            tradeRepository.save(TradeEntity.builder()
+            val trade = TradeEntity.builder()
                     .seccode(buy.seccode())
                     .buyOrderId(buy.id())
                     .sellOrderId(sell.id())
                     .price(resting.price())
                     .quantity(execution.quantity())
                     .executedAt(OffsetDateTime.now(UTC))
-                    .build());
+                    .build();
+            tradeRepository.save(trade);
+
+            logAfterCommit(() -> log.info(
+                    "Сделка записана, сделкаId={}, инструмент={}, покупкаId={}, продажаId={}, цена={}, лоты={}",
+                    trade.getId(), trade.getSeccode(), trade.getBuyOrderId(), trade.getSellOrderId(),
+                    trade.getPrice(), trade.getQuantity()
+            ));
 
             updateOrderAfterFill(orderRepository.getReferenceById(resting.id()), execution.quantity());
             filled += execution.quantity();
@@ -226,9 +244,27 @@ public class TradingService {
         }
 
         val result = toOrder(entity);
-        return plan.cancelRemainder()
-                ? cancelAndReleaseReserve(instrument, result)
-                : result;
+        if (plan.cancelRemainder()) {
+            val cancelled = cancelAndReleaseReserve(instrument, result);
+            logAfterCommit(() -> log.info(
+                    "Остаток заявки отменён для предотвращения сделки с собой, заявкаId={}, участникId={}, инструмент={}",
+                    cancelled.id(), cancelled.userId(), cancelled.seccode()
+            ));
+            return cancelled;
+        }
+        return result;
+    }
+
+    private void logOrderAfterCommit(@NonNull final String operation, @NonNull final Order order) {
+        logAfterCommit(() -> log.info(
+                "Заявка обработана, операция={}, заявкаId={}, участникId={}, инструмент={}, статус={}, открытоЛотов={}",
+                operation,
+                order.id(),
+                order.userId(),
+                order.seccode(),
+                order.status(),
+                order.remaining()
+        ));
     }
 
     private void updateOrderAfterFill(@NonNull final OrderEntity entity, final int executedQuantity) {

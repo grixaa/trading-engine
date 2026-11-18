@@ -9,6 +9,7 @@ import com.spvb.tradingengine.repository.mapper.PersistenceMapper;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
@@ -19,9 +20,11 @@ import java.util.List;
 import static com.spvb.tradingengine.enums.AssetType.CURRENCY;
 import static com.spvb.tradingengine.enums.AssetType.SECURITY;
 import static com.spvb.tradingengine.enums.InstrumentType.FX;
+import static com.spvb.tradingengine.util.TransactionLogging.logAfterCommit;
 import static lombok.AccessLevel.PRIVATE;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class CatalogService {
@@ -33,6 +36,7 @@ public class CatalogService {
         if (assetRepository.insertIfAbsent(asset.code(), asset.type().name()) == 0) {
             throw new AssetExistsException("Актив %s уже существует".formatted(asset.code()));
         }
+        logAfterCommit(() -> log.info("Актив зарегистрирован, код={}, тип={}", asset.code(), asset.type()));
         return asset;
     }
 
@@ -77,6 +81,11 @@ public class CatalogService {
             throw new InstrumentExistsException("Инструмент %s уже существует".formatted(instrument.seccode()));
         }
 
+        logAfterCommit(() -> log.info(
+                "Инструмент зарегистрирован, код={}, тип={}",
+                instrument.seccode(),
+                instrument.type()
+        ));
         return instrument;
     }
 
