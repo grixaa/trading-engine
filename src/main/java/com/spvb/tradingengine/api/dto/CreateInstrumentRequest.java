@@ -1,6 +1,6 @@
 package com.spvb.tradingengine.api.dto;
 
-import com.spvb.tradingengine.domain.InstrumentType;
+import com.spvb.tradingengine.enums.InstrumentType;
 import jakarta.validation.constraints.*;
 
 import java.math.BigDecimal;

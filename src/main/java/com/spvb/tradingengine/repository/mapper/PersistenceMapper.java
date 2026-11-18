@@ -16,14 +16,14 @@ import lombok.experimental.UtilityClass;
 
 @UtilityClass
 public class PersistenceMapper {
-    public Asset toAsset(@NonNull final AssetEntity entity) {
+    public static Asset toAsset(@NonNull final AssetEntity entity) {
         return Asset.builder()
                 .code(entity.getCode())
                 .type(entity.getType())
                 .build();
     }
 
-    public Balance toBalance(@NonNull final BalanceEntity entity) {
+    public static Balance toBalance(@NonNull final BalanceEntity entity) {
         return Balance.builder()
                 .asset(entity.getId().getAsset())
                 .available(entity.getAvailable())
@@ -31,7 +31,7 @@ public class PersistenceMapper {
                 .build();
     }
 
-    public Instrument toInstrument(@NonNull final InstrumentEntity entity) {
+    public static Instrument toInstrument(@NonNull final InstrumentEntity entity) {
         return Instrument.builder()
                 .seccode(entity.getSeccode())
                 .type(entity.getType())
@@ -42,7 +42,7 @@ public class PersistenceMapper {
                 .build();
     }
 
-    public Order toOrder(@NonNull final OrderEntity entity) {
+    public static Order toOrder(@NonNull final OrderEntity entity) {
         return Order.builder()
                 .id(entity.getId())
                 .userId(entity.getUserId())
@@ -58,7 +58,7 @@ public class PersistenceMapper {
                 .build();
     }
 
-    public Trade toTrade(@NonNull final TradeEntity entity) {
+    public static Trade toTrade(@NonNull final TradeEntity entity) {
         return Trade.builder()
                 .id(entity.getId())
                 .seccode(entity.getSeccode())

@@ -11,8 +11,8 @@ import com.spvb.tradingengine.api.dto.OrderResponse;
 import com.spvb.tradingengine.api.dto.PlaceOrderRequest;
 import com.spvb.tradingengine.domain.CursorPage;
 import com.spvb.tradingengine.domain.OrderFilter;
-import com.spvb.tradingengine.domain.OrderStatus;
-import com.spvb.tradingengine.domain.Side;
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
 import com.spvb.tradingengine.service.MarketDataService;
 import com.spvb.tradingengine.service.TradingService;
 import jakarta.validation.Valid;
@@ -46,7 +46,7 @@ public class OrderController {
     MarketDataService marketDataService;
 
     @PostMapping
-    public ResponseEntity<OrderResponse> place(
+    public ResponseEntity<OrderResponse> placeOrder(
             @RequestHeader(USER_ID_HEADER)
             @Positive
             final long userId,
@@ -56,7 +56,7 @@ public class OrderController {
             @NonNull
             final PlaceOrderRequest request
     ) {
-        val order = tradingService.place(
+        val order = tradingService.placeOrder(
                 userId,
                 request.seccode(),
                 request.side(),
@@ -71,7 +71,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<OrderResponse> amend(
+    public ResponseEntity<OrderResponse> amendOrder(
             @RequestHeader(USER_ID_HEADER)
             @Positive
             final long userId,
@@ -90,11 +90,11 @@ public class OrderController {
                 : Integer.valueOf(request.remaining().intValueExact());
 
         return ResponseEntity
-                .ok(OrderResponse.from(tradingService.amend(userId, id, request.price(), remaining)));
+                .ok(OrderResponse.from(tradingService.amendOrder(userId, id, request.price(), remaining)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<OrderResponse> cancel(
+    public ResponseEntity<OrderResponse> cancelOrder(
             @RequestHeader(USER_ID_HEADER)
             @Positive
             final long userId,
@@ -104,11 +104,11 @@ public class OrderController {
             final long id
     ) {
         return ResponseEntity
-                .ok(OrderResponse.from(tradingService.cancel(userId, id)));
+                .ok(OrderResponse.from(tradingService.cancelOrder(userId, id)));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<OrderResponse> order(
+    public ResponseEntity<OrderResponse> getOrderById(
             @RequestHeader(USER_ID_HEADER)
             @Positive
             final long userId,
@@ -118,11 +118,11 @@ public class OrderController {
             final long id
     ) {
         return ResponseEntity
-                .ok(OrderResponse.from(marketDataService.order(userId, id)));
+                .ok(OrderResponse.from(marketDataService.getOrderById(userId, id)));
     }
 
     @GetMapping
-    public ResponseEntity<CursorPage<OrderResponse>> orders(
+    public ResponseEntity<CursorPage<OrderResponse>> listUserOrders(
             @RequestHeader(USER_ID_HEADER)
             @Positive
             final long userId,
@@ -144,7 +144,7 @@ public class OrderController {
             @Max(100)
             final int limit
     ) {
-        val page = marketDataService.orders(
+        val page = marketDataService.listUserOrders(
                 userId,
                 new OrderFilter(seccode, side, status, beforeId, limit)
         );

@@ -48,20 +48,20 @@ public class CatalogController {
     }
 
     @GetMapping("/assets")
-    public ResponseEntity<List<Asset>> assets() {
+    public ResponseEntity<List<Asset>> listAssets() {
         return ResponseEntity
-                .ok(catalogService.assets());
+                .ok(catalogService.listAssets());
     }
 
     @GetMapping("/assets/{code}")
-    public ResponseEntity<Asset> asset(
+    public ResponseEntity<Asset> getAssetByCode(
             @PathVariable
             @Pattern(regexp = ASSET_CODE_PATTERN)
             @NonNull
             final String code
     ) {
         return ResponseEntity
-                .ok(catalogService.asset(code));
+                .ok(catalogService.getAssetByCode(code));
     }
 
     @PostMapping("/instruments")
@@ -86,24 +86,24 @@ public class CatalogController {
     }
 
     @GetMapping("/instruments")
-    public ResponseEntity<List<Instrument>> instruments() {
+    public ResponseEntity<List<Instrument>> listInstruments() {
         return ResponseEntity
-                .ok(catalogService.instruments());
+                .ok(catalogService.listInstruments());
     }
 
     @GetMapping("/instruments/{seccode}")
-    public ResponseEntity<Instrument> instrument(
+    public ResponseEntity<Instrument> getInstrumentByCode(
             @PathVariable
             @Pattern(regexp = ASSET_CODE_PATTERN)
             @NonNull
             final String seccode
     ) {
         return ResponseEntity
-                .ok(catalogService.instrument(seccode));
+                .ok(catalogService.getInstrumentByCode(seccode));
     }
 
     @GetMapping("/instruments/{seccode}/order-book")
-    public ResponseEntity<OrderBook> orderBook(
+    public ResponseEntity<OrderBook> getOrderBook(
             @PathVariable
             @Pattern(regexp = ASSET_CODE_PATTERN)
             @NonNull final
@@ -115,6 +115,6 @@ public class CatalogController {
             final int depth
     ) {
         return ResponseEntity
-                .ok(marketDataService.book(seccode, depth));
+                .ok(marketDataService.getOrderBook(seccode, depth));
     }
 }

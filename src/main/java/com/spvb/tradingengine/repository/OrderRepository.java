@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.spvb.tradingengine.domain.OrderStatus;
-import com.spvb.tradingengine.domain.Side;
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
 import com.spvb.tradingengine.entity.OrderEntity;
 import jakarta.persistence.QueryHint;
 import org.hibernate.jpa.HibernateHints;
@@ -20,10 +20,10 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
 
     // Read an immutable scalar before locking so the persistence context does not cache a stale order.
     @Query("SELECT o.seccode FROM OrderEntity o WHERE o.userId = :userId AND o.id = :id")
-    Optional<String> findOwnedInstrument(long userId, long id);
+    Optional<String> findInstrumentCodeForUserOrder(long userId, long id);
 
     @Query(value = "SELECT nextval('order_priority_seq')", nativeQuery = true)
-    long nextPriority();
+    long nextOrderPriority();
 
     @Query("""
             SELECT o FROM OrderEntity o
@@ -32,7 +32,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
             ORDER BY o.price ASC, o.priority
             """)
     @QueryHints(@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "128"))
-    Stream<OrderEntity> crossingAsks(String seccode, BigDecimal price);
+    Stream<OrderEntity> streamMatchingSellOrders(String seccode, BigDecimal price);
 
     @Query("""
             SELECT o FROM OrderEntity o
@@ -41,7 +41,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
             ORDER BY o.price DESC, o.priority
             """)
     @QueryHints(@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "128"))
-    Stream<OrderEntity> crossingBids(String seccode, BigDecimal price);
+    Stream<OrderEntity> streamMatchingBuyOrders(String seccode, BigDecimal price);
 
     @Query("""
             SELECT o FROM OrderEntity o WHERE o.userId = :userId
@@ -51,7 +51,9 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
               AND (:beforeId IS NULL OR o.id < :beforeId)
             ORDER BY o.id DESC
             """)
-    List<OrderEntity> search(long userId, String seccode, Side side, OrderStatus status, Long beforeId, Pageable page);
+    List<OrderEntity> findUserOrdersByFilters(
+            long userId, String seccode, Side side, OrderStatus status, Long beforeId, Pageable page
+    );
 
     @Query(value = """
             (SELECT side, price, SUM(quantity - filled) AS quantity
@@ -64,5 +66,5 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
              WHERE seccode = :seccode AND side = 'SELL' AND status IN ('OPEN', 'PARTIALLY_FILLED')
              GROUP BY side, price ORDER BY price ASC LIMIT :depth)
             """, nativeQuery = true)
-    List<BookLevelProjection> bookRows(String seccode, int depth);
+    List<BookLevelProjection> findOrderBookLevels(String seccode, int depth);
 }

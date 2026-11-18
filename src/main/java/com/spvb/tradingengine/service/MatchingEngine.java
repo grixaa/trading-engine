@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 class MatchingEngine {
-    MatchPlan plan(
+    MatchPlan buildMatchPlan(
             final long userId,
             final int quantity,
             @NonNull final Iterator<Order> crossingInPriorityOrder

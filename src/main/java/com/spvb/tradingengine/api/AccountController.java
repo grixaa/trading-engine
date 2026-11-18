@@ -24,26 +24,26 @@ public class AccountController {
     AccountService accountService;
 
     @PutMapping("/accounts/{userId}")
-    public ResponseEntity<Void> open(@PathVariable @Positive final long userId) {
-        accountService.open(userId);
+    public ResponseEntity<Void> openTradingAccount(@PathVariable @Positive final long userId) {
+        accountService.openTradingAccount(userId);
         return ResponseEntity.noContent()
                 .build();
     }
 
     @PostMapping("/accounts/{userId}/deposits")
-    public ResponseEntity<Balance> deposit(
+    public ResponseEntity<Balance> depositAsset(
             @PathVariable @Positive final long userId,
             @Valid @RequestBody @NonNull final DepositRequest request
     ) {
         return ResponseEntity
-                .ok(accountService.deposit(userId, request.asset(), request.amount()));
+                .ok(accountService.depositAsset(userId, request.asset(), request.amount()));
     }
 
     @GetMapping("/balances")
-    public ResponseEntity<List<Balance>> balances(
+    public ResponseEntity<List<Balance>> getAccountBalances(
             @RequestHeader(USER_ID_HEADER) @Positive final long userId
     ) {
         return ResponseEntity
-                .ok(accountService.balances(userId));
+                .ok(accountService.getAccountBalances(userId));
     }
 }

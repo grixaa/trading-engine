@@ -13,6 +13,7 @@ import lombok.experimental.FieldDefaults;
 import lombok.val;
 import org.springframework.stereotype.Service;
 
+import static com.spvb.tradingengine.repository.mapper.PersistenceMapper.toBalance;
 import static lombok.AccessLevel.PRIVATE;
 
 @Service
@@ -21,7 +22,7 @@ import static lombok.AccessLevel.PRIVATE;
 class BalanceService {
     BalanceRepository balanceRepository;
 
-    public boolean move(
+    public boolean adjustBalanceAmounts(
             final long userId,
             @NonNull final String asset,
             @NonNull final BigDecimal availableDelta,
@@ -47,7 +48,7 @@ class BalanceService {
         return true;
     }
 
-    public Balance credit(
+    public Balance creditAvailableBalance(
             final long userId,
             @NonNull final String asset,
             @NonNull final BigDecimal amount
@@ -62,11 +63,11 @@ class BalanceService {
                     .reserved(BigDecimal.ZERO)
                     .build();
 
-            return PersistenceMapper.toBalance(balanceRepository.save(balance));
+            return toBalance(balanceRepository.save(balance));
         }
 
         val balance = existing.get();
         balance.setAvailable(balance.getAvailable().add(amount));
-        return PersistenceMapper.toBalance(balance);
+        return toBalance(balance);
     }
 }

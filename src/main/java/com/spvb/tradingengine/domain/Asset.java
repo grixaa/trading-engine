@@ -1,5 +1,6 @@
 package com.spvb.tradingengine.domain;
 
+import com.spvb.tradingengine.enums.AssetType;
 import lombok.Builder;
 import lombok.NonNull;
 

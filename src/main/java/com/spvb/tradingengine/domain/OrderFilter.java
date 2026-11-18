@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.domain;
 
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
 import org.springframework.lang.Nullable;
 
 public record OrderFilter(

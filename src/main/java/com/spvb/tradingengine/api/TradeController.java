@@ -28,7 +28,7 @@ public class TradeController {
     MarketDataService marketDataService;
 
     @GetMapping
-    public ResponseEntity<CursorPage<Trade>> trades(
+    public ResponseEntity<CursorPage<Trade>> listTrades(
             @RequestParam(required = false)
             @Pattern(regexp = ASSET_CODE_PATTERN)
             @Nullable
@@ -50,7 +50,7 @@ public class TradeController {
             final int limit
     ) {
         return ResponseEntity
-                .ok(marketDataService.trades(
+                .ok(marketDataService.listTrades(
                         TradeFilter.builder()
                                 .seccode(seccode)
                                 .orderId(orderId)

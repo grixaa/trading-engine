@@ -1,6 +1,6 @@
 package com.spvb.tradingengine.api.dto;
 
-import com.spvb.tradingengine.domain.AssetType;
+import com.spvb.tradingengine.enums.AssetType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 

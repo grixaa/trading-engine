@@ -1,4 +1,4 @@
-package com.spvb.tradingengine.domain;
+package com.spvb.tradingengine.enums;
 
 public enum Side {
     BUY,

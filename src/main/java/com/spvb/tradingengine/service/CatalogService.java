@@ -16,9 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-import static com.spvb.tradingengine.domain.AssetType.CURRENCY;
-import static com.spvb.tradingengine.domain.AssetType.SECURITY;
-import static com.spvb.tradingengine.domain.InstrumentType.FX;
+import static com.spvb.tradingengine.enums.AssetType.CURRENCY;
+import static com.spvb.tradingengine.enums.AssetType.SECURITY;
+import static com.spvb.tradingengine.enums.InstrumentType.FX;
 import static lombok.AccessLevel.PRIVATE;
 
 @Service
@@ -36,13 +36,13 @@ public class CatalogService {
         return asset;
     }
 
-    public Asset asset(@NonNull final String code) {
+    public Asset getAssetByCode(@NonNull final String code) {
         return assetRepository.findById(code)
                 .map(PersistenceMapper::toAsset)
                 .orElseThrow(() -> new AssetNotFoundException("Актив %s не найден".formatted(code)));
     }
 
-    public List<Asset> assets() {
+    public List<Asset> listAssets() {
         return assetRepository.findAllByOrderByCodeAsc().stream()
                 .map(PersistenceMapper::toAsset)
                 .toList();
@@ -50,8 +50,8 @@ public class CatalogService {
 
     @Transactional
     public Instrument createInstrument(@NonNull final Instrument instrument) {
-        val base = asset(instrument.baseAsset());
-        val quote = asset(instrument.quoteCurrency());
+        val base = getAssetByCode(instrument.baseAsset());
+        val quote = getAssetByCode(instrument.quoteCurrency());
         val expectedBaseType = instrument.type() == FX
                 ? CURRENCY
                 : SECURITY;
@@ -80,19 +80,19 @@ public class CatalogService {
         return instrument;
     }
 
-    public Instrument instrument(@NonNull final String code) {
+    public Instrument getInstrumentByCode(@NonNull final String code) {
         return instrumentRepository.findById(code)
                 .map(PersistenceMapper::toInstrument)
                 .orElseThrow(() -> new InstrumentNotFoundException("Инструмент %s не найден".formatted(code)));
     }
 
-    public List<Instrument> instruments() {
+    public List<Instrument> listInstruments() {
         return instrumentRepository.findAllByOrderBySeccodeAsc().stream()
                 .map(PersistenceMapper::toInstrument)
                 .toList();
     }
 
-    public Instrument lockInstrument(@NonNull final String code) {
+    public Instrument lockInstrumentForTrading(@NonNull final String code) {
         return instrumentRepository.findLockedBySeccode(code)
                 .map(PersistenceMapper::toInstrument)
                 .orElseThrow(() -> new InstrumentNotFoundException("Инструмент %s не найден".formatted(code)));

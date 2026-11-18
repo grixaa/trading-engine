@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.util.List;
 
-import static com.spvb.tradingengine.domain.AssetType.SECURITY;
+import static com.spvb.tradingengine.enums.AssetType.SECURITY;
 import static lombok.AccessLevel.PRIVATE;
 import static org.apache.commons.collections4.CollectionUtils.isEmpty;
 
@@ -30,11 +30,11 @@ public class AccountService {
     BalanceRepository balanceRepository;
 
     @Transactional
-    public void open(final long userId) {
-        accountRepository.open(userId);
+    public void openTradingAccount(final long userId) {
+        accountRepository.insertAccountIfAbsent(userId);
     }
 
-    public List<Balance> balances(final long userId) {
+    public List<Balance> getAccountBalances(final long userId) {
         if (!accountRepository.existsById(userId)) {
             throw new AccountNotFoundException("Торговый счёт участника %d не найден".formatted(userId));
         }
@@ -44,21 +44,21 @@ public class AccountService {
     }
 
     @Transactional
-    public Balance deposit(
+    public Balance depositAsset(
             final long userId,
             @NonNull final String assetCode,
             @NonNull final BigDecimal amount
     ) {
-        val asset = catalogService.asset(assetCode);
+        val asset = catalogService.getAssetByCode(assetCode);
 
         if (asset.type() == SECURITY && amount.stripTrailingZeros().scale() > 0) {
             throw new InvalidAmountException("Количество ценных бумаг должно быть целым числом");
         }
 
-        if (isEmpty(accountRepository.lockBatch(List.of(userId)))) {
+        if (isEmpty(accountRepository.lockAccountsByUserIds(List.of(userId)))) {
             throw new AccountNotFoundException("Торговый счёт участника %d не найден".formatted(userId));
         }
 
-        return balanceService.credit(userId, assetCode, amount);
+        return balanceService.creditAvailableBalance(userId, assetCode, amount);
     }
 }

@@ -10,7 +10,7 @@ import com.spvb.tradingengine.domain.Order;
 import com.spvb.tradingengine.domain.OrderBook;
 import com.spvb.tradingengine.domain.OrderFilter;
 import com.spvb.tradingengine.domain.QuoteLevel;
-import com.spvb.tradingengine.domain.Side;
+import com.spvb.tradingengine.enums.Side;
 import com.spvb.tradingengine.domain.Trade;
 import com.spvb.tradingengine.domain.TradeFilter;
 import com.spvb.tradingengine.exception.OrderNotFoundException;
@@ -24,8 +24,8 @@ import lombok.val;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import static com.spvb.tradingengine.domain.Side.BUY;
-import static com.spvb.tradingengine.domain.Side.SELL;
+import static com.spvb.tradingengine.enums.Side.BUY;
+import static com.spvb.tradingengine.enums.Side.SELL;
 import static lombok.AccessLevel.PRIVATE;
 
 @Service
@@ -36,14 +36,14 @@ public class MarketDataService {
     OrderRepository orderRepository;
     TradeRepository tradeRepository;
 
-    public Order order(final long userId, final long id) {
+    public Order getOrderById(final long userId, final long id) {
         return orderRepository.findByUserIdAndId(userId, id)
                 .map(PersistenceMapper::toOrder)
                 .orElseThrow(() -> new OrderNotFoundException("Заявка %d не найдена".formatted(id)));
     }
 
-    public CursorPage<Order> orders(final long userId, @NonNull final OrderFilter filter) {
-        val rows = orderRepository.search(
+    public CursorPage<Order> listUserOrders(final long userId, @NonNull final OrderFilter filter) {
+        val rows = orderRepository.findUserOrdersByFilters(
                         userId,
                         filter.seccode(),
                         filter.side(),
@@ -54,11 +54,11 @@ public class MarketDataService {
                 .map(PersistenceMapper::toOrder)
                 .toList();
 
-        return page(rows, filter.limit(), Order::id);
+        return buildCursorPage(rows, filter.limit(), Order::id);
     }
 
-    public CursorPage<Trade> trades(@NonNull final TradeFilter filter) {
-        val rows = tradeRepository.search(
+    public CursorPage<Trade> listTrades(@NonNull final TradeFilter filter) {
+        val rows = tradeRepository.findTradesByFilters(
                         filter.seccode(),
                         filter.orderId(),
                         filter.beforeId(),
@@ -67,13 +67,13 @@ public class MarketDataService {
                 .map(PersistenceMapper::toTrade)
                 .toList();
 
-        return page(rows, filter.limit(), Trade::id);
+        return buildCursorPage(rows, filter.limit(), Trade::id);
     }
 
-    public OrderBook book(@NonNull final String seccode, final int depth) {
-        catalogService.instrument(seccode);
+    public OrderBook getOrderBook(@NonNull final String seccode, final int depth) {
+        catalogService.getInstrumentByCode(seccode);
 
-        val levels = orderRepository.bookRows(seccode, depth).stream()
+        val levels = orderRepository.findOrderBookLevels(seccode, depth).stream()
                 .map(row -> new BookLevel(
                         Side.valueOf(row.getSide()),
                         row.getPrice(),
@@ -84,12 +84,12 @@ public class MarketDataService {
 
         return new OrderBook(
                 seccode,
-                quotes(levels, BUY, byPrice.reversed()),
-                quotes(levels, SELL, byPrice)
+                buildQuoteLevels(levels, BUY, byPrice.reversed()),
+                buildQuoteLevels(levels, SELL, byPrice)
         );
     }
 
-    private List<QuoteLevel> quotes(
+    private List<QuoteLevel> buildQuoteLevels(
             @NonNull final List<BookLevel> levels,
             @NonNull final Side side,
             @NonNull final Comparator<BookLevel> order
@@ -101,7 +101,7 @@ public class MarketDataService {
                 .toList();
     }
 
-    private <T> CursorPage<T> page(
+    private <T> CursorPage<T> buildCursorPage(
             @NonNull final List<T> rows,
             final int limit,
             @NonNull final ToLongFunction<T> id

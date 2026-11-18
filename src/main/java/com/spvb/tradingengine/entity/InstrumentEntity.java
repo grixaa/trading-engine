@@ -1,6 +1,6 @@
 package com.spvb.tradingengine.entity;
 
-import com.spvb.tradingengine.domain.InstrumentType;
+import com.spvb.tradingengine.enums.InstrumentType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;

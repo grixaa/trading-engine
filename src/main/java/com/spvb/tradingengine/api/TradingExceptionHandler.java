@@ -37,7 +37,7 @@ public class TradingExceptionHandler {
             AccountNotFoundException.class
     })
     public ResponseEntity<ProblemDetail> handleNotFound(@NonNull final TradingErrorDetails exception) {
-        return response(NOT_FOUND, "Ресурс не найден", exception);
+        return buildProblemResponse(NOT_FOUND, "Ресурс не найден", exception);
     }
 
     @ExceptionHandler({
@@ -47,7 +47,7 @@ public class TradingExceptionHandler {
             InsufficientBalanceException.class
     })
     public ResponseEntity<ProblemDetail> handleConflict(@NonNull final TradingErrorDetails exception) {
-        return response(CONFLICT, "Конфликт состояния", exception);
+        return buildProblemResponse(CONFLICT, "Конфликт состояния", exception);
     }
 
     @ExceptionHandler({
@@ -58,10 +58,10 @@ public class TradingExceptionHandler {
             EmptyAmendmentException.class
     })
     public ResponseEntity<ProblemDetail> handleBadRequest(@NonNull final TradingErrorDetails exception) {
-        return response(BAD_REQUEST, "Некорректный запрос", exception);
+        return buildProblemResponse(BAD_REQUEST, "Некорректный запрос", exception);
     }
 
-    private ResponseEntity<ProblemDetail> response(
+    private ResponseEntity<ProblemDetail> buildProblemResponse(
             @NonNull final HttpStatus status,
             @NonNull final String title,
             @NonNull final TradingErrorDetails exception

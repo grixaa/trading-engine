@@ -1,7 +1,7 @@
 package com.spvb.tradingengine.entity;
 
-import com.spvb.tradingengine.domain.OrderStatus;
-import com.spvb.tradingengine.domain.Side;
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;

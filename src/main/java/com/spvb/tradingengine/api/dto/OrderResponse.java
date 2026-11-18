@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
 import com.spvb.tradingengine.domain.Order;
-import com.spvb.tradingengine.domain.OrderStatus;
-import com.spvb.tradingengine.domain.Side;
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
 import lombok.Builder;
 
 @Builder

@@ -2,10 +2,12 @@ package com.spvb.tradingengine.domain;
 
 import java.math.BigDecimal;
 
+import com.spvb.tradingengine.enums.InstrumentType;
+import com.spvb.tradingengine.enums.Side;
 import lombok.Builder;
 import lombok.NonNull;
 
-import static com.spvb.tradingengine.domain.Side.*;
+import static com.spvb.tradingengine.enums.Side.*;
 
 @Builder
 public record Instrument(
@@ -16,23 +18,23 @@ public record Instrument(
         int lotSize,
         @NonNull BigDecimal minStep
 ) {
-    public BigDecimal units(final int lots) {
+    public BigDecimal calculateBaseUnits(final int lots) {
         return BigDecimal.valueOf((long) lotSize * lots);
     }
 
-    public String reservedAsset(@NonNull final Side side) {
+    public String getReserveAssetCode(@NonNull final Side side) {
         return side == BUY
                 ? quoteCurrency
                 : baseAsset;
     }
 
-    public BigDecimal reservation(
+    public BigDecimal calculateRequiredReserve(
             @NonNull final Side side,
             @NonNull final BigDecimal price,
             final int lots
     ) {
         return side == BUY
-                ? price.multiply(units(lots))
-                : units(lots);
+                ? price.multiply(calculateBaseUnits(lots))
+                : calculateBaseUnits(lots);
     }
 }

@@ -15,5 +15,5 @@ public interface TradeRepository extends JpaRepository<TradeEntity, Long> {
               AND (:beforeId IS NULL OR t.id < :beforeId)
             ORDER BY t.id DESC
             """)
-    List<TradeEntity> search(String seccode, Long orderId, Long beforeId, Pageable page);
+    List<TradeEntity> findTradesByFilters(String seccode, Long orderId, Long beforeId, Pageable page);
 }
