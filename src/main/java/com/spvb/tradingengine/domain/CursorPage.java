@@ -1,8 +1,12 @@
 package com.spvb.tradingengine.domain;
 
+import org.springframework.lang.Nullable;
+
+import lombok.NonNull;
+
 import java.util.List;
 
 public record CursorPage<T>(
-        List<T> items,
-        Long nextBeforeId
+        @NonNull List<T> items,
+        @Nullable Long nextBeforeId
 ) {}

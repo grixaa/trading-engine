@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.api.dto;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
@@ -10,17 +12,18 @@ import lombok.Builder;
 
 @Builder
 public record OrderResponse(
-        long id, String seccode,
-        Side side,
-        BigDecimal price,
+        long id,
+        @NonNull String seccode,
+        @NonNull Side side,
+        @NonNull BigDecimal price,
         int quantity,
         int filled,
         int remaining,
-        OrderStatus status,
-        OffsetDateTime createdAt,
-        OffsetDateTime updatedAt
+        @NonNull OrderStatus status,
+        @NonNull OffsetDateTime createdAt,
+        @NonNull OffsetDateTime updatedAt
 ) {
-    public static OrderResponse from(Order order) {
+    public static OrderResponse from(@NonNull final Order order) {
         return OrderResponse.builder()
                 .id(order.id())
                 .seccode(order.seccode())

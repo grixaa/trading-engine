@@ -1,10 +1,13 @@
 package com.spvb.tradingengine.exception;
 
-import lombok.Getter;
 import lombok.experimental.StandardException;
 
-@Getter
 @StandardException
 public final class InvalidInstrumentException extends RuntimeException implements TradingErrorDetails {
-    private final String code = "INVALID_INSTRUMENT";
+    private static final String CODE = "INVALID_INSTRUMENT";
+
+    @Override
+    public String getCode() {
+        return CODE;
+    }
 }

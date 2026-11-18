@@ -1,6 +1,8 @@
 package com.spvb.tradingengine.domain;
 
+import lombok.NonNull;
+
 public record Execution(
-        Order resting,
+        @NonNull Order resting,
         int quantity
 ) {}

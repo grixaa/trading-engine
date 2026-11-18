@@ -1,10 +1,13 @@
 package com.spvb.tradingengine.exception;
 
-import lombok.Getter;
 import lombok.experimental.StandardException;
 
-@Getter
 @StandardException
 public final class OrderNotFoundException extends RuntimeException implements TradingErrorDetails {
-    private final String code = "ORDER_NOT_FOUND";
+    private static final String CODE = "ORDER_NOT_FOUND";
+
+    @Override
+    public String getCode() {
+        return CODE;
+    }
 }

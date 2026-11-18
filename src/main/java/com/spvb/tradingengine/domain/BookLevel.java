@@ -1,9 +1,11 @@
 package com.spvb.tradingengine.domain;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 
 public record BookLevel(
-        Side side,
-        BigDecimal price,
+        @NonNull Side side,
+        @NonNull BigDecimal price,
         long quantity
 ) {}

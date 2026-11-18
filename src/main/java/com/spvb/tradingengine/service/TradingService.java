@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.service;
 
+import org.springframework.lang.Nullable;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -35,9 +37,9 @@ import static lombok.AccessLevel.PRIVATE;
 @FieldDefaults(level = PRIVATE, makeFinal = true)
 public class TradingService {
     CatalogService catalogService;
+    MatchingEngine matchingEngine;
     OrderRepository orderRepository;
     TradeRepository tradeRepository;
-    MatchingEngine matchingEngine;
     SettlementService settlementService;
 
     public Order place(
@@ -72,8 +74,8 @@ public class TradingService {
     public Order amend(
             final long userId,
             final long orderId,
-            @NonNull final BigDecimal price,
-            @NonNull final Integer remaining
+            @Nullable final BigDecimal price,
+            @Nullable final Integer remaining
     ) {
         val instrument = lockOrderInstrument(userId, orderId);
         val entity = ownedOrder(userId, orderId);
@@ -162,7 +164,7 @@ public class TradingService {
         return plan.cancelRemainder() ? releaseAndCancel(instrument, result) : result;
     }
 
-    private void applyFill(@NonNull final OrderEntity entity, int executedQuantity) {
+    private void applyFill(@NonNull final OrderEntity entity, final int executedQuantity) {
         val filled = entity.getFilled() + executedQuantity;
         entity.setFilled(filled);
         entity.setStatus(OrderStatus.forFill(filled, entity.getQuantity()));

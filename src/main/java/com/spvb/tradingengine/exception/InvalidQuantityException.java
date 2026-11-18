@@ -1,10 +1,13 @@
 package com.spvb.tradingengine.exception;
 
-import lombok.Getter;
 import lombok.experimental.StandardException;
 
-@Getter
 @StandardException
 public final class InvalidQuantityException extends RuntimeException implements TradingErrorDetails {
-    private final String code = "INVALID_QUANTITY";
+    private static final String CODE = "INVALID_QUANTITY";
+
+    @Override
+    public String getCode() {
+        return CODE;
+    }
 }

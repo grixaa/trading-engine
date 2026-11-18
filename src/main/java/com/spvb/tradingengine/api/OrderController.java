@@ -1,5 +1,9 @@
 package com.spvb.tradingengine.api;
 
+import org.springframework.lang.Nullable;
+
+import lombok.NonNull;
+
 import java.net.URI;
 
 import com.spvb.tradingengine.api.dto.AmendOrderRequest;
@@ -49,6 +53,7 @@ public class OrderController {
 
             @Valid
             @RequestBody
+            @NonNull
             final PlaceOrderRequest request
     ) {
         val order = tradingService.place(
@@ -77,6 +82,7 @@ public class OrderController {
 
             @Valid
             @RequestBody
+            @NonNull
             final AmendOrderRequest request
     ) {
         val remaining = request.remaining() == null
@@ -123,14 +129,15 @@ public class OrderController {
 
             @RequestParam(required = false)
             @Pattern(regexp = ASSET_CODE_PATTERN)
+            @Nullable
             final String seccode,
 
-            @RequestParam(required = false) final Side side,
-            @RequestParam(required = false) final OrderStatus status,
+            @RequestParam(required = false) @Nullable final Side side,
+            @RequestParam(required = false) @Nullable final OrderStatus status,
 
             @RequestParam(required = false)
             @Positive
-            final Long beforeId,
+            @Nullable final Long beforeId,
 
             @RequestParam(defaultValue = "20")
             @Positive

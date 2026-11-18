@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.api;
 
+import org.springframework.lang.Nullable;
+
 import com.spvb.tradingengine.domain.CursorPage;
 import com.spvb.tradingengine.domain.Trade;
 import com.spvb.tradingengine.domain.TradeFilter;
@@ -29,14 +31,17 @@ public class TradeController {
     public ResponseEntity<CursorPage<Trade>> trades(
             @RequestParam(required = false)
             @Pattern(regexp = ASSET_CODE_PATTERN)
+            @Nullable
             final String seccode,
 
             @RequestParam(required = false)
             @Positive
+            @Nullable
             final Long orderId,
 
             @RequestParam(required = false)
             @Positive
+            @Nullable
             final Long beforeId,
 
             @RequestParam(defaultValue = "20")

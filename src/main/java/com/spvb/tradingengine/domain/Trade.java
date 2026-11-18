@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.domain;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
@@ -8,10 +10,10 @@ import lombok.Builder;
 @Builder
 public record Trade(
         long id,
-        String seccode,
+        @NonNull String seccode,
         long buyOrderId,
         long sellOrderId,
-        BigDecimal price,
+        @NonNull BigDecimal price,
         int quantity,
-        OffsetDateTime executedAt
+        @NonNull OffsetDateTime executedAt
 ) {}

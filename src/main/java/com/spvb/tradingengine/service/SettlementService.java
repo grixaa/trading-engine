@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.service;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,18 +17,22 @@ import com.spvb.tradingengine.exception.InsufficientBalanceException;
 import com.spvb.tradingengine.repository.AccountRepository;
 import com.spvb.tradingengine.entity.AccountEntity;
 import lombok.RequiredArgsConstructor;
+import lombok.experimental.FieldDefaults;
 import lombok.val;
 import org.springframework.stereotype.Component;
 
+import static lombok.AccessLevel.PRIVATE;
+
 @Component
 @RequiredArgsConstructor
+@FieldDefaults(level = PRIVATE, makeFinal = true)
 class SettlementService {
     private static final int ACCOUNT_LOCK_BATCH_SIZE = 1000;
 
-    private final AccountRepository accounts;
-    private final BalanceService balances;
+    BalanceService balanceService;
+    AccountRepository accountRepository;
 
-    void lockParticipants(long userId, MatchPlan plan) {
+    void lockParticipants(final long userId, @NonNull final MatchPlan plan) {
         val participants = new TreeSet<Long>();
         participants.add(userId);
         for (val execution : plan.executions()) {
@@ -41,21 +47,21 @@ class SettlementService {
         }
     }
 
-    private List<Long> lockAccounts(List<Long> sortedUsers) {
+    private List<Long> lockAccounts(@NonNull final List<Long> sortedUsers) {
         val locked = new ArrayList<Long>(sortedUsers.size());
         for (int start = 0; start < sortedUsers.size(); start += ACCOUNT_LOCK_BATCH_SIZE) {
             val end = Math.min(start + ACCOUNT_LOCK_BATCH_SIZE, sortedUsers.size());
-            accounts.lockBatch(sortedUsers.subList(start, end)).stream()
+            accountRepository.lockBatch(sortedUsers.subList(start, end)).stream()
                     .map(AccountEntity::getUserId).forEach(locked::add);
         }
         return locked;
     }
 
-    void changeReservation(long userId, String asset, BigDecimal delta) {
+    void changeReservation(final long userId, @NonNull final String asset, @NonNull final BigDecimal delta) {
         if (delta.signum() == 0) {
             return;
         }
-        if (balances.move(userId, asset, delta.negate(), delta)) {
+        if (balanceService.move(userId, asset, delta.negate(), delta)) {
             return;
         }
         if (delta.signum() > 0) {
@@ -64,7 +70,7 @@ class SettlementService {
         throw new IllegalStateException("Не найден резерв актива %s на счёте участника %d".formatted(asset, userId));
     }
 
-    void settle(Instrument instrument, Order incoming, Execution execution) {
+    void settle(@NonNull final Instrument instrument, @NonNull final Order incoming, @NonNull final Execution execution) {
         val resting = execution.resting();
         val buy = incoming.side() == Side.BUY ? incoming : resting;
         val sell = incoming.side() == Side.SELL ? incoming : resting;
@@ -74,12 +80,12 @@ class SettlementService {
 
         consumeReserve(buy.userId(), instrument.quoteCurrency(), reservedCash.subtract(cost), reservedCash);
         consumeReserve(sell.userId(), instrument.baseAsset(), BigDecimal.ZERO, units);
-        balances.credit(buy.userId(), instrument.baseAsset(), units);
-        balances.credit(sell.userId(), instrument.quoteCurrency(), cost);
+        balanceService.credit(buy.userId(), instrument.baseAsset(), units);
+        balanceService.credit(sell.userId(), instrument.quoteCurrency(), cost);
     }
 
-    private void consumeReserve(long userId, String asset, BigDecimal refund, BigDecimal consumed) {
-        if (!balances.move(userId, asset, refund, consumed.negate())) {
+    private void consumeReserve(final long userId, @NonNull final String asset, @NonNull final BigDecimal refund, @NonNull final BigDecimal consumed) {
+        if (!balanceService.move(userId, asset, refund, consumed.negate())) {
             throw new IllegalStateException("Не найден резерв актива %s на счёте участника %d".formatted(asset, userId));
         }
     }

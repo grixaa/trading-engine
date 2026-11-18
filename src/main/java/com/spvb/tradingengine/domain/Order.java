@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.domain;
 
+import lombok.NonNull;
+
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 
@@ -9,16 +11,15 @@ import lombok.Builder;
 public record Order(
         long id,
         long userId,
-        String seccode,
-        Side side,
-        BigDecimal price,
+        @NonNull String seccode,
+        @NonNull Side side,
+        @NonNull BigDecimal price,
         int quantity,
         int filled,
-        OrderStatus status,
+        @NonNull OrderStatus status,
         long priority,
-        OffsetDateTime createdAt,
-
-        OffsetDateTime updatedAt
+        @NonNull OffsetDateTime createdAt,
+        @NonNull OffsetDateTime updatedAt
 ) {
     public int remaining() {
         return status.isActive()

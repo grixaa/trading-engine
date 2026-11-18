@@ -10,7 +10,7 @@ public enum OrderStatus {
         return this == OPEN || this == PARTIALLY_FILLED;
     }
 
-    public static OrderStatus forFill(int filled, int quantity) {
+    public static OrderStatus forFill(final int filled, final int quantity) {
         if (filled == 0) {
             return OPEN;
         }

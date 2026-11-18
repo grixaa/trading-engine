@@ -1,5 +1,7 @@
 package com.spvb.tradingengine.api;
 
+import lombok.NonNull;
+
 import com.spvb.tradingengine.api.dto.CreateAssetRequest;
 import com.spvb.tradingengine.api.dto.CreateInstrumentRequest;
 import com.spvb.tradingengine.domain.Asset;
@@ -33,7 +35,7 @@ public class CatalogController {
 
     @PostMapping("/assets")
     public ResponseEntity<Asset> createAsset(
-            @Valid @RequestBody final CreateAssetRequest request
+            @Valid @RequestBody @NonNull final CreateAssetRequest request
     ) {
         val asset = catalogService.createAsset(Asset.builder()
                 .code(request.code())
@@ -53,7 +55,10 @@ public class CatalogController {
 
     @GetMapping("/assets/{code}")
     public ResponseEntity<Asset> asset(
-            @PathVariable @Pattern(regexp = ASSET_CODE_PATTERN) final String code
+            @PathVariable
+            @Pattern(regexp = ASSET_CODE_PATTERN)
+            @NonNull
+            final String code
     ) {
         return ResponseEntity
                 .ok(catalogService.asset(code));
@@ -61,7 +66,10 @@ public class CatalogController {
 
     @PostMapping("/instruments")
     public ResponseEntity<Instrument> createInstrument(
-            @Valid @RequestBody final CreateInstrumentRequest request
+            @Valid
+            @RequestBody
+            @NonNull
+            final CreateInstrumentRequest request
     ) {
         val instrument = catalogService.createInstrument(Instrument.builder()
                 .seccode(request.seccode())
@@ -85,7 +93,10 @@ public class CatalogController {
 
     @GetMapping("/instruments/{seccode}")
     public ResponseEntity<Instrument> instrument(
-            @PathVariable @Pattern(regexp = ASSET_CODE_PATTERN) final String seccode
+            @PathVariable
+            @Pattern(regexp = ASSET_CODE_PATTERN)
+            @NonNull
+            final String seccode
     ) {
         return ResponseEntity
                 .ok(catalogService.instrument(seccode));
@@ -93,8 +104,15 @@ public class CatalogController {
 
     @GetMapping("/instruments/{seccode}/order-book")
     public ResponseEntity<OrderBook> orderBook(
-            @PathVariable @Pattern(regexp = ASSET_CODE_PATTERN) final String seccode,
-            @RequestParam(defaultValue = "10") @Positive @Max(100) final int depth
+            @PathVariable
+            @Pattern(regexp = ASSET_CODE_PATTERN)
+            @NonNull final
+            String seccode,
+
+            @RequestParam(defaultValue = "10")
+            @Positive
+            @Max(100)
+            final int depth
     ) {
         return ResponseEntity
                 .ok(marketDataService.book(seccode, depth));

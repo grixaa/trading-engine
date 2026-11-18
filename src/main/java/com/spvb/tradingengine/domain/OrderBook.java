@@ -1,9 +1,11 @@
 package com.spvb.tradingengine.domain;
 
+import lombok.NonNull;
+
 import java.util.List;
 
 public record OrderBook(
-        String seccode,
-        List<QuoteLevel> bids,
-        List<QuoteLevel> asks
+        @NonNull String seccode,
+        @NonNull List<QuoteLevel> bids,
+        @NonNull List<QuoteLevel> asks
 ) {}

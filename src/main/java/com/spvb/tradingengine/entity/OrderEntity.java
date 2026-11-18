@@ -45,6 +45,7 @@ public class OrderEntity {
 
     @Setter
     long priority;
+
     OffsetDateTime createdAt;
 
     @Setter

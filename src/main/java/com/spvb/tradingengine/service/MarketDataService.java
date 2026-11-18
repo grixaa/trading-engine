@@ -43,8 +43,17 @@ public class MarketDataService {
     }
 
     public CursorPage<Order> orders(final long userId, @NonNull final OrderFilter filter) {
-        val rows = orderRepository.search(userId, filter.seccode(), filter.side(), filter.status(), filter.beforeId(),
-                Pageable.ofSize(filter.limit() + 1)).stream().map(PersistenceMapper::toOrder).toList();
+        val rows = orderRepository.search(
+                        userId,
+                        filter.seccode(),
+                        filter.side(),
+                        filter.status(),
+                        filter.beforeId(),
+                        Pageable.ofSize(filter.limit() + 1)
+                ).stream()
+                .map(PersistenceMapper::toOrder)
+                .toList();
+
         return page(rows, filter.limit(), Order::id);
     }
 
@@ -65,8 +74,12 @@ public class MarketDataService {
         catalogService.instrument(seccode);
 
         val levels = orderRepository.bookRows(seccode, depth).stream()
-                .map(row -> new BookLevel(Side.valueOf(row.getSide()), row.getPrice(), row.getQuantity()))
-                .toList();
+                .map(row -> new BookLevel(
+                        Side.valueOf(row.getSide()),
+                        row.getPrice(),
+                        row.getQuantity()
+                )).toList();
+
         val byPrice = Comparator.comparing(BookLevel::price);
 
         return new OrderBook(

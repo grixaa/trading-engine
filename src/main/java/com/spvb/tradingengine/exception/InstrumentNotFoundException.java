@@ -1,10 +1,13 @@
 package com.spvb.tradingengine.exception;
 
-import lombok.Getter;
 import lombok.experimental.StandardException;
 
-@Getter
 @StandardException
 public final class InstrumentNotFoundException extends RuntimeException implements TradingErrorDetails {
-    private final String code = "INSTRUMENT_NOT_FOUND";
+    private static final String CODE = "INSTRUMENT_NOT_FOUND";
+
+    @Override
+    public String getCode() {
+        return CODE;
+    }
 }

@@ -1,10 +1,13 @@
 package com.spvb.tradingengine.exception;
 
-import lombok.Getter;
 import lombok.experimental.StandardException;
 
-@Getter
 @StandardException
 public final class OrderClosedException extends RuntimeException implements TradingErrorDetails {
-    private final String code = "ORDER_CLOSED";
+    private static final String CODE = "ORDER_CLOSED";
+
+    @Override
+    public String getCode() {
+        return CODE;
+    }
 }
