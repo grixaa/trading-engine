@@ -1,0 +1,37 @@
+services:
+  app:
+    build: .
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      TRADING_HTTP_PORT: "${TRADING_HTTP_PORT:?Задайте TRADING_HTTP_PORT в .env или передайте --env-file .env.example}"
+      TRADING_DB_URL: "${TRADING_DB_URL}"
+      TRADING_DB_USER: "${TRADING_DB_USER}"
+      TRADING_DB_PASSWORD: "${TRADING_DB_PASSWORD}"
+      TRADING_LOG_LEVEL: "${TRADING_LOG_LEVEL}"
+    ports:
+      - "${TRADING_HTTP_HOST:?Задайте TRADING_HTTP_HOST в .env или передайте --env-file .env.example}:${TRADING_HTTP_PORT}:${TRADING_HTTP_PORT}"
+
+  postgres:
+    image: postgres:16
+    command: ["postgres", "-p", "${TRADING_DB_PORT}"]
+    environment:
+      POSTGRES_DB: "${TRADING_DB_NAME}"
+      POSTGRES_USER: "${TRADING_DB_USER}"
+      POSTGRES_PASSWORD: "${TRADING_DB_PASSWORD}"
+      PGPORT: "${TRADING_DB_PORT}"
+    networks:
+      default:
+        aliases:
+          - "${TRADING_DB_HOST}"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h \"$$HOSTNAME\" -p \"$$PGPORT\" -U \"$$POSTGRES_USER\" -d \"$$POSTGRES_DB\""]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+
+volumes:
+  postgres-data:

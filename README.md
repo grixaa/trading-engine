@@ -2,13 +2,45 @@
 
 REST-сервис для непрерывной торговли акциями, облигациями и валютными парами с лимитными заявками.
 
+## Запуск через Docker Compose
+
+Выполняйте команды из корня проекта. В `.env.example` уже указаны настройки для быстрого запуска. Файл `.env` содержит те же переменные с пустыми значениями, чтобы вы могли задать свои настройки.
+
+### Быстрый запуск с .env.example
+
+```bash
+docker compose --env-file .env.example up --build -d
+```
+
+После запуска откройте [Swagger UI](http://localhost:8080/swagger-ui.html). Чтобы остановить и удалить контейнеры, выполните:
+
+```bash
+docker compose --env-file .env.example down
+```
+
+### Запуск со своими настройками
+
+Заполните `.env` по образцу `.env.example`. Compose автоматически прочитает `.env`.
+
+```bash
+docker compose up --build -d
+```
+
+Откройте `/swagger-ui.html` на адресе и порту, заданных в `.env`. Для остановки и удаления контейнеров выполните `docker compose down` с тем же файлом настроек.
+
+В обоих вариантах приложение запускается после готовности PostgreSQL, а Flyway применяет миграции. Данные сохраняются в томе `postgres-data`. Чтобы удалить и данные базы, добавьте `-v` к соответствующей команде `down`. Имя базы и учётные данные PostgreSQL применяются при инициализации пустого тома.
+
 ## Переменные окружения (.env)
 
-- `TRADING_DB_URL` — JDBC-адрес базы
+- `TRADING_DB_URL` — JDBC-адрес базы, составленный из имени узла, порта и имени базы
+- `TRADING_DB_HOST` — сетевое имя PostgreSQL внутри Compose
+- `TRADING_DB_PORT` — порт PostgreSQL внутри Compose
+- `TRADING_DB_NAME` — имя базы PostgreSQL
 - `TRADING_DB_USER` — пользователь PostgreSQL
 - `TRADING_DB_PASSWORD` — пароль пользователя PostgreSQL
-- `TRADING_HTTP_PORT` — HTTP-порт приложения (по умолчанию 8080)
-- `TRADING_LOG_LEVEL` — уровень логирования приложения(по умолчанию `INFO`)
+- `TRADING_HTTP_HOST` — адрес, на котором Docker публикует приложение
+- `TRADING_HTTP_PORT` — HTTP-порт приложения, используемый в контейнере и на хосте
+- `TRADING_LOG_LEVEL` — уровень логирования приложения
 
 ## Логирование
 
