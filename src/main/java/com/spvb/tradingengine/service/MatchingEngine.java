@@ -23,9 +23,11 @@ class MatchingEngine {
 
         while (remaining > 0 && crossingInPriorityOrder.hasNext()) {
             val resting = crossingInPriorityOrder.next();
+
             if (resting.userId() == userId) {
                 return new MatchPlan(List.copyOf(executions), true);
             }
+
             val fill = Math.min(remaining, resting.remaining());
             executions.add(new Execution(resting, fill));
             remaining -= fill;

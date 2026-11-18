@@ -1,19 +1,20 @@
 package com.spvb.tradingengine.repository;
 
+import com.spvb.tradingengine.entity.OrderEntity;
+import com.spvb.tradingengine.enums.OrderStatus;
+import com.spvb.tradingengine.enums.Side;
+import jakarta.persistence.QueryHint;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import com.spvb.tradingengine.enums.OrderStatus;
-import com.spvb.tradingengine.enums.Side;
-import com.spvb.tradingengine.entity.OrderEntity;
-import jakarta.persistence.QueryHint;
-import org.hibernate.jpa.HibernateHints;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.jpa.repository.QueryHints;
+import static org.hibernate.jpa.HibernateHints.HINT_FETCH_SIZE;
 
 public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
     Optional<OrderEntity> findByUserIdAndId(long userId, long id);
@@ -31,7 +32,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
               AND o.side = SELL AND o.price <= :price
             ORDER BY o.price ASC, o.priority
             """)
-    @QueryHints(@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "128"))
+    @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "128"))
     Stream<OrderEntity> streamMatchingSellOrders(String seccode, BigDecimal price);
 
     @Query("""
@@ -40,7 +41,7 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
               AND o.side = BUY AND o.price >= :price
             ORDER BY o.price DESC, o.priority
             """)
-    @QueryHints(@QueryHint(name = HibernateHints.HINT_FETCH_SIZE, value = "128"))
+    @QueryHints(@QueryHint(name = HINT_FETCH_SIZE, value = "128"))
     Stream<OrderEntity> streamMatchingBuyOrders(String seccode, BigDecimal price);
 
     @Query("""
@@ -52,7 +53,12 @@ public interface OrderRepository extends JpaRepository<OrderEntity, Long> {
             ORDER BY o.id DESC
             """)
     List<OrderEntity> findUserOrdersByFilters(
-            long userId, String seccode, Side side, OrderStatus status, Long beforeId, Pageable page
+            long userId,
+            String seccode,
+            Side side,
+            OrderStatus status,
+            Long beforeId,
+            Pageable page
     );
 
     @Query(value = """
