@@ -58,7 +58,7 @@ public class CatalogService {
 
         if (base.type() != expectedBaseType ||
                 quote.type() != CURRENCY ||
-                !StringUtils.equals(base.code(), quote.code())
+                StringUtils.equals(base.code(), quote.code())
         ) {
             throw new InvalidInstrumentException("Несовместимые типы базового актива и валюты котировки");
         }
