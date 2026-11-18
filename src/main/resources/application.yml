@@ -1,0 +1,14 @@
+spring:
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+  mvc:
+    problemdetails:
+      enabled: true
+  datasource:
+    url: ${TRADING_DB_URL:jdbc:postgresql://localhost:5432/trading}
+    username: ${TRADING_DB_USER:}
+    password: ${TRADING_DB_PASSWORD}
+    hikari:
+      transaction-isolation: TRANSACTION_READ_COMMITTED
